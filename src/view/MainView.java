@@ -8,15 +8,12 @@ import java.awt.Font;
 import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.FocusAdapter;
-import java.awt.event.FocusEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.awt.image.BufferedImage;
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -38,9 +35,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
-import javax.swing.JTextPane;
 import javax.swing.ScrollPaneConstants;
-import javax.swing.SwingConstants;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.WindowConstants;
@@ -67,10 +62,14 @@ public class MainView extends JFrame implements WindowListener, ActionListener, 
 	JTextArea chatArea, chatReiceiArea;
 	MainViewController mViewControll;
 	JScrollPane scrollChat, scrollReceipt;
+	JPanel pnlIcon_File,pnlEmoticon;
 	Webcam webcam;
 	JTextField textIP, textPort;
 	JLabel lblImage, lblIP, lblPort;
-//	 WebcamVideo webVideo = new WebcamVideo();
+	JButton btnIcon;
+
+	JButton btnFile;
+	// WebcamVideo webVideo = new WebcamVideo();
 	JPanel pnlSouth, pnlSouthParent, pnlVideo, pnlEast, pnlWebcam, pnlTmp, pnlNorth, pnlCenter;
 	JButton btnOpenWC, btnPause, bntCloseWC, btnMinium, btnMicrohone, btnConnect;
 	public Image image;
@@ -80,6 +79,7 @@ public class MainView extends JFrame implements WindowListener, ActionListener, 
 	WebcamVideo webVideo;
 	JLayeredPane lPaneEmo = new JLayeredPane();
 	ChatEmoticons emo = new ChatEmoticons();
+	File fileList;
 
 	public MainView() throws Exception {
 		super();
@@ -87,7 +87,14 @@ public class MainView extends JFrame implements WindowListener, ActionListener, 
 		webVideo = new WebcamVideo(this);
 		view();
 	}
-
+	
+	public JButton getBtnIcon() {
+		return btnIcon;
+	}
+	
+	public void setBtnIcon(JButton btnIcon) {
+		this.btnIcon = btnIcon;
+	}
 	public JTextArea getChatArea() {
 		return chatArea;
 	}
@@ -145,7 +152,9 @@ public class MainView extends JFrame implements WindowListener, ActionListener, 
 		// setUndecorated(true);//excute with title bar (không cho phép thu nhỏ phóng to
 		// và tắt)
 		pack();
+		setSize(880,720);
 		setVisible(true);
+		setLocationRelativeTo(null);
 		this.addWindowListener(this);
 		// sự kiện thoát game
 		mViewControll.login();
@@ -252,16 +261,12 @@ public class MainView extends JFrame implements WindowListener, ActionListener, 
 		try {
 			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
 		} catch (ClassNotFoundException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (InstantiationException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (IllegalAccessException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (UnsupportedLookAndFeelException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 
@@ -321,7 +326,6 @@ public class MainView extends JFrame implements WindowListener, ActionListener, 
 
 		int dayOfWeek = c.get(Calendar.DAY_OF_WEEK);
 		Font font = new Font("Tahoma", Font.BOLD, 11);
-		JTextPane t = new JTextPane();
 		chatReiceiArea = new JTextArea(10, 30);
 		chatReiceiArea.setFont(font);
 
@@ -341,9 +345,6 @@ public class MainView extends JFrame implements WindowListener, ActionListener, 
 		chatReiceiArea.setEditable(false);// không thể chỉnh sửa dòng văn bản
 		// chatReiceiArea.setOpaque(false); // background of parent will be painted
 		// first
-		Image imgg = ImageIO.read(getClass().getResource("/image/smiling.png"));
-		// anh run
-		Image newimg = imgg.getScaledInstance(18, 18, java.awt.Image.SCALE_SMOOTH);
 
 		scrollReceipt = new JScrollPane(chatReiceiArea);
 		scrollReceipt.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
@@ -357,49 +358,20 @@ public class MainView extends JFrame implements WindowListener, ActionListener, 
 		scrollChat = new JScrollPane(chatArea);
 		scrollChat.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
 
-		JPanel pnlIcon_File = new JPanel(new BorderLayout());
+		pnlIcon_File = new JPanel(new BorderLayout());
 		JButton button = new JButton();
-		JButton bntIcon = addButton(button, "Icon", "/image/smiling.png");
-		JButton bntFile = addButton(button, "Icon", "/image/paperclip.png");
+		btnIcon = addButton(button, "Icon", "/image/smiling.png");
+		btnFile = addButton(button, "Icon", "/image/paperclip.png");
 		
-		JLayeredPane lPaneChat = new JLayeredPane();
-		lPaneChat.setBounds(0, 0, 594, 249);
-		lPaneEmo.setBackground(Color.red);
-		lPaneEmo.setBounds(10, 10, 178, 160);
-		lPaneEmo.setVisible(false);
-		lPaneChat.add(lPaneEmo,JLayeredPane.POPUP_LAYER);
-		lPaneEmo.addFocusListener(new FocusAdapter() {
-			@Override
-			public void focusLost(FocusEvent e) {
-				lPaneEmo.setVisible(false);
-			}
-		});
-		bntIcon.setVerticalAlignment(SwingConstants.TOP);
-		bntIcon.addMouseListener(new MouseAdapter() {
-			@Override
-			public void mouseClicked(MouseEvent arg0) {
-				System.out.println("click me");
-				t.insertIcon(new ImageIcon(imgg));
-				if(lPaneEmo.isVisible()){
-					lPaneEmo.setVisible(false);
-				}else{
-					lPaneEmo.setVisible(true);
-					lPaneEmo.requestFocus();
-				}
-			}
-		});
-		bntIcon.setHorizontalAlignment(SwingConstants.CENTER);
-		add(lPaneChat,BorderLayout.SOUTH);
-		
-		
-		
-		pnlIcon_File.add(bntIcon, BorderLayout.CENTER);
-		pnlIcon_File.add(bntFile, BorderLayout.SOUTH);
-		
-//		bntIcon.setIcon(emo.smiley);
+		pnlEmoticon = new JPanel();
+		pnlEmoticon.add(mViewControll.emoticon());
+		pnlIcon_File.add(btnIcon, BorderLayout.CENTER);
+		pnlIcon_File.add(btnFile, BorderLayout.SOUTH);
 
+		// bntIcon.setIcon(emo.smiley);
 
 		pnlWebcam = new JPanel(new BorderLayout());
+		pnlWebcam.add(pnlEmoticon, BorderLayout.NORTH);
 		pnlWebcam.add(scrollChat, BorderLayout.CENTER);
 		pnlWebcam.add(pnlIcon_File, BorderLayout.EAST);
 		pnlWebcam.add(south(), BorderLayout.SOUTH);
@@ -408,7 +380,8 @@ public class MainView extends JFrame implements WindowListener, ActionListener, 
 		pnlEast.add(scrollReceipt, BorderLayout.CENTER);
 
 		chatArea.addKeyListener(this);
-//		bntIcon.addActionListener(this);
+		btnIcon.addActionListener(this);
+		btnFile.addActionListener(this);
 
 		return pnlEast;
 
@@ -429,18 +402,17 @@ public class MainView extends JFrame implements WindowListener, ActionListener, 
 				java.awt.Color.decode("#FF0301"))));
 
 		// khai báo đối tưởng webcam với time out mặc định.s
-//		Webcam webcam = Webcam.getDefault();
-//		for (Dimension dimension : webcam.getViewSizes()) {
-//			System.out.println(dimension.toString());
-//
-//		}
-//		 hoặc setView với card mà web hỗ trợ, ở đây dùng đại VGA mặc định 640*480, nhà
-//		 nghèo :)
-//		webcam.setViewSize(new Dimension(176, 144));
-//		 Mở webcam
-//		webcam.open();
+		// Webcam webcam = Webcam.getDefault();
+		// for (Dimension dimension : webcam.getViewSizes()) {
+		// System.out.println(dimension.toString());
+		//
+		// }
+		// hoặc setView với card mà web hỗ trợ, ở đây dùng đại VGA mặc định 640*480, nhà
+		// nghèo :)
+		// webcam.setViewSize(new Dimension(176, 144));
+		// Mở webcam
+		// webcam.open();
 		// Tạo khung giao diện
-		
 
 		pnlVideo = new JPanel(new BorderLayout());// Cần một panel tổng
 		pnlTmp = new JPanel(new FlowLayout());
@@ -535,66 +507,79 @@ public class MainView extends JFrame implements WindowListener, ActionListener, 
 			authorController = new AuthorController();
 		}
 		if (e.getSource() == btnConnect) {// butto kết nối đến server
-//			 add(webVideo.createNewUser("User 1", "/image/wide.png"));
+			// add(webVideo.createNewUser("User 1", "/image/wide.png"));
 
 		}
-		if (e.getSource() == btnPause) {
-			if (count % 2 == 0) {
-				count++;
-				try {
-					mViewControll.play("/image/pause.png", btnPause);
-					// webVideo.resumeWebcam(webcam);
-					// webVideo.resume();
-
-				} catch (IOException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
-				}
-			} else {
-				count++;
-				try {
-					// webVideo.stop();
-					// webVideo.resume();
-					// webVideo.createWebcam(webcam, lblImage);
-					mViewControll.pause("/image/play.png", btnPause);
-				} catch (IOException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
-				}
+		if (e.getSource() == btnIcon) {// button open emotion
+			if(mViewControll.emoticon().isVisible()) {
+				mViewControll.emoticon().setVisible(false);
+				System.out.println(btnIcon.getX()+"d");
+				
+			}else {
+				mViewControll.emoticon().setVisible(true);;
 			}
 		}
-		if (e.getSource() == btnMinium) {
+		if (e.getSource() == btnFile) {// button open filechooser
+			mViewControll.sendFile();
 
-			if (counts % 2 == 0) {
-				counts++;
-				mViewControll.minium(pnlTmp, false);
-
-			} else {
-				counts++;
-				mViewControll.minium(pnlTmp, true);
-			}
-		}
-		if (e.getSource() == btnMicrohone) {
-			if (countss % 2 == 0) {
-				countss++;
-				try {
-					mViewControll.microphone("/image/muted.png", btnMicrohone);
-				} catch (IOException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
-				}
-
-			} else {
-				countss++;
-				try {
-					mViewControll.microphone("/image/microphone.png", btnMicrohone);
-				} catch (IOException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
-				}
-			}
 		}
 
+			if (e.getSource() == btnPause) {
+				if (count % 2 == 0) {
+					count++;
+					try {
+						mViewControll.play("/image/pause.png", btnPause);
+						// webVideo.resumeWebcam(webcam);
+						// webVideo.resume();
+
+					} catch (IOException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
+				} else {
+					count++;
+					try {
+						// webVideo.stop();
+						// webVideo.resume();
+						// webVideo.createWebcam(webcam, lblImage);
+						mViewControll.pause("/image/play.png", btnPause);
+					} catch (IOException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
+				}
+			}
+			if (e.getSource() == btnMinium) {
+
+				if (counts % 2 == 0) {
+					counts++;
+					mViewControll.minium(pnlTmp, false);
+
+				} else {
+					counts++;
+					mViewControll.minium(pnlTmp, true);
+				}
+			}
+			if (e.getSource() == btnMicrohone) {
+				if (countss % 2 == 0) {
+					countss++;
+					try {
+						mViewControll.microphone("/image/muted.png", btnMicrohone);
+					} catch (IOException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
+
+				} else {
+					countss++;
+					try {
+						mViewControll.microphone("/image/microphone.png", btnMicrohone);
+					} catch (IOException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
+				}
+			}
 	}
 
 	@Override
@@ -644,7 +629,7 @@ public class MainView extends JFrame implements WindowListener, ActionListener, 
 		try {
 			if (e.getKeyCode() == KeyEvent.VK_ENTER && e.isShiftDown()) {
 			} else if (e.getKeyCode() == KeyEvent.VK_ENTER) {
-				setChat( chatArea.getText());// lấy dòng chat của client
+				setChat(chatArea.getText());// lấy dòng chat của client
 				mViewControll.chat(getChat());// gửi qua cho controller và controller tiến hành
 			}
 		} catch (IOException e1) {

@@ -3,16 +3,29 @@ package controller;
 import java.io.*;
 import java.net.*;
 import java.text.SimpleDateFormat;
+import java.awt.FlowLayout;
+import java.awt.GridLayout;
 import java.awt.Image;
+import java.awt.event.FocusAdapter;
+import java.awt.event.FocusEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.util.Calendar;
 
 import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import javax.swing.JFileChooser;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JLayeredPane;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPasswordField;
 import javax.swing.JTextField;
+import javax.swing.SwingConstants;
+import javax.swing.UIManager;
+import javax.swing.border.LineBorder;
 
 import controller.PlaceholderController.GhostText;
 
@@ -34,12 +47,22 @@ public class MainViewController {
 	String userName;
 	PlaceholderController placeholder;
 	GhostText ghostText;
-	ChatEmoticons emo = new ChatEmoticons();
+	ChatEmoticons emo;
+	JFrame jframe;
+	static int ii,jj,kk;
+	JButton[][] button;
+	JPanel pnlBoard,pnlEmoticon;
 
 	public MainViewController(MainView main) {
 		this.mainView = main;
 		userName = new String();
-		placeholder=new PlaceholderController();
+		placeholder = new PlaceholderController();
+		jframe = new JFrame("Chọn file");
+		emo = new ChatEmoticons();
+		button = new JButton[7][6];
+		pnlBoard = new JPanel(new GridLayout(button.length, button[0].length));
+	
+		createEmotion();
 	}
 
 	public String getUserName() {
@@ -74,19 +97,18 @@ public class MainViewController {
 		socket = new Socket(IP, PORT);
 		out = new PrintWriter(new OutputStreamWriter(socket.getOutputStream()), true);
 		in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-		ghostText = new GhostText(mainView.getChatArea(),"  Nhập tin nhắn ...");
+		ghostText = new GhostText(mainView.getChatArea(), "  Nhập tin nhắn ...");
 		while (in.read() != -1) {
 			cal = Calendar.getInstance();
 			sdf = new SimpleDateFormat("HH:mm:ss");
-//			StyleConstants.setForeground(null, SystemColor.textHighlight);
-			mainView.getChatReiceiArea().append(
-					"[" + sdf.format(cal.getTime()) + "] "+ in.readLine().trim() + "\n");// append
+			// StyleConstants.setForeground(null, SystemColor.textHighlight);
+			mainView.getChatReiceiArea().append("[" + sdf.format(cal.getTime()) + "] " + in.readLine().trim() + "\n");// append
 			// ghi đoạn chat mà server gửi về
-			//set lại text cho khung nhập chat là rỗng
+			// set lại text cho khung nhập chat là rỗng
 			mainView.getChatArea().setText(null);
-			//Tạo chữ nhập tin nhắn và bắt sự kiện click mouse
-			ghostText = new GhostText(mainView.getChatArea(),"  Nhập tin nhắn ...");
-//			mainView.getChatArea().setForeground(Color.GRAY);
+			// Tạo chữ nhập tin nhắn và bắt sự kiện click mouse
+			ghostText = new GhostText(mainView.getChatArea(), "  Nhập tin nhắn ...");
+			// mainView.getChatArea().setForeground(Color.GRAY);
 
 		}
 
@@ -95,7 +117,7 @@ public class MainViewController {
 	public void chat(String chat) throws IOException {
 		if (chat != null) {
 			// gửi đoạn chat lên server
-			out.println(getUserName()+ ": " +chat.trim());
+			out.println(getUserName() + ": " + chat.trim());
 
 		} else {
 
@@ -229,6 +251,93 @@ public class MainViewController {
 
 	public static void main(String[] args) throws IOException {
 		// new MainViewController().connectVideoCam("");
+	}
+
+	public void sendFile() {
+		JFileChooser fc = new JFileChooser();
+		int returnVal = fc.showOpenDialog(jframe);
+		if (returnVal == JFileChooser.OPEN_DIALOG) {
+			File transferFile = fc.getSelectedFile();
+			if (transferFile.length() > 2147000000) {
+				String[] buttons = { "Biết rồi" };
+				ImageIcon icon = new ImageIcon(getClass().getResource("/Image/warnings.png"));
+
+				int rc = JOptionPane.showOptionDialog(null, "Kích thước file vượt quá mức cho phép!\n Không quá 2GB",
+						"Lỗi tập tin", JOptionPane.INFORMATION_MESSAGE, 0, icon, buttons, buttons[0]);
+				if (rc == 0) {
+					System.out.println(rc);
+				} else {
+					System.out.println("nothing");
+
+				}
+			} else {
+				// writer.println(username + "`" + i + "`fileDecide`" + transferFile.getName());
+				// writer.flush();
+				// ap.append("\nSending " + transferFile.getName() + ".");
+			}
+		}
+
+	}
+	public void lis(final JLabel o, final int a, final int b){
+		o.setVerticalAlignment(SwingConstants.BOTTOM);
+		o.setHorizontalAlignment(SwingConstants.CENTER);
+		o.setBounds(a+5, b+5, 24, 24);
+		pnlBoard.add(o, JLayeredPane.POPUP_LAYER);
+		o.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseEntered(MouseEvent e){
+				o.setBorder(new LineBorder(UIManager.getColor("List.dropLineColor")));
+			}
+			@Override
+			public void mouseExited(MouseEvent e){
+				o.setBorder(null);
+			}
+			@Override
+			public void mousePressed(MouseEvent m) {
+//				inputTextArea.append(emo.mousePre(a, b));
+//				lPaneEmo.setVisible(false);
+//				inputTextArea.requestFocus();
+			}
+		});
+	}
+	public void createEmotion() {
+		pnlEmoticon= new JPanel();
+		int k =0;
+		
+		for (int i = 0; i < button.length; i++) {
+			for (int j = 0; j < button[i].length; j++) {
+				button[i][j] = new JButton();
+				
+				button[i][j].setIcon(emo.imageIcons[k]);
+				pnlBoard.add(button[i][j]);
+				
+				button[i][j].addMouseListener(new MouseAdapter() {
+					@Override
+					public void mouseEntered(MouseEvent e){
+//						jframe.setVisible(true);
+//						button[i][j].setBorder(new LineBorder(UIManager.getColor("List.dropLineColor")));
+					}
+					@Override
+					public void mouseExited(MouseEvent e){
+//						jframe.setVisible(false);
+					}
+					@Override
+					public void mousePressed(MouseEvent m) {
+//						mainView.getChatArea().append(emo.emoticons[k]);
+						pnlEmoticon.setVisible(false);
+						mainView.getChatArea().requestFocus();
+					}
+				});
+				k++;
+			}
+		}
+		pnlEmoticon.setFocusable(true);
+//		jframe.setLocationRelativeTo(null);
+		pnlEmoticon.add(pnlBoard);
+
+	}
+	public JPanel emoticon() {
+		return pnlEmoticon;
 	}
 
 }
